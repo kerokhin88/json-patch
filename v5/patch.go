@@ -77,6 +77,9 @@ type ApplyOptions struct {
 	// EnsurePathExistsOnAdd instructs json-patch to recursively create the missing parts of path on "add" operation.
 	// Default to false.
 	EnsurePathExistsOnAdd bool
+	// AllowMissingPathOnMove instructs json-patch to not generate error on move operation if from path does not exists.
+	// Default to false
+	AllowMissingPathOnMove bool
 }
 
 // NewApplyOptions creates a default set of options for calls to ApplyWithOptions.
@@ -86,6 +89,7 @@ func NewApplyOptions() *ApplyOptions {
 		AccumulatedCopySizeLimit: AccumulatedCopySizeLimit,
 		AllowMissingPathOnRemove: false,
 		EnsurePathExistsOnAdd:    false,
+		AllowMissingPathOnMove:   false,
 	}
 }
 
@@ -732,6 +736,9 @@ func (p Patch) move(doc *container, op Operation, options *ApplyOptions) error {
 	con, key := findObject(doc, from, options)
 
 	if con == nil {
+		if options.AllowMissingPathOnMove {
+			return nil
+		}
 		return errors.Wrapf(ErrMissing, "move operation does not apply: doc is missing from path: %s", from)
 	}
 
