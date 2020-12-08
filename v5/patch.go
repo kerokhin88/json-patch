@@ -744,6 +744,9 @@ func (p Patch) move(doc *container, op Operation, options *ApplyOptions) error {
 
 	val, err := con.get(key, options)
 	if err != nil {
+		if options.AllowMissingPathOnMove {
+			return nil
+		}
 		return errors.Wrapf(err, "error in move for path: '%s'", key)
 	}
 
